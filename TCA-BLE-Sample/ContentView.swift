@@ -13,7 +13,7 @@ import ComposableBluetoothCentralManager
 struct AppState: Equatable {
     var isEnableBLE = false
     var isScanning = false
-    var scannedDevices: [CBPeripheral] = []
+    var discoveredDevices: [CBPeripheral] = []
 }
 
 enum AppAction: Equatable {
@@ -41,7 +41,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             
         case let .didDiscover(peripheral: peripheral, advertisementData: advertisementData, rssi: rssi):
             print("Discovered:", peripheral, advertisementData, rssi)
-            state.scannedDevices.append(peripheral)
+            state.discoveredDevices.append(peripheral)
             
         default:
             break
@@ -57,16 +57,14 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             .fireAndForget()
         
     case .scanButtonTapped:
-        state.scannedDevices = []
+        state.discoveredDevices = []
         state.isScanning = true
-        return environment.centralManager
-            .scanForPeripherals(id: CentralManagerId(), withServices: nil, options: nil)
+        return environment.centralManager.scanForPeripherals(id: CentralManagerId(), withServices: nil, options: nil)
             .fireAndForget()
         
     case .stopButtonTapped:
         state.isScanning = false
-        return environment.centralManager
-            .stopScan(id: CentralManagerId())
+        return environment.centralManager.stopScan(id: CentralManagerId())
             .fireAndForget()
     }
 }
@@ -77,7 +75,7 @@ struct ContentView: View {
     var body: some View {
         WithViewStore(store) { viewStore in
             VStack(spacing: 10) {
-                Text("Scanned \(viewStore.scannedDevices.count) devices")
+                Text("Discovered \(viewStore.discoveredDevices.count) devices")
                 if viewStore.state.isScanning {
                     Button("Stop") {
                         viewStore.send(.stopButtonTapped)
