@@ -49,7 +49,9 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
         return .none
         
     case .onAppear:
-        return environment.centralManager.create(id: CentralManagerId())
+        return environment.centralManager.create(id: CentralManagerId(), queue: DispatchQueue(label: "com.bricklife.tca-ble"))
+            .receive(on: environment.mainQueue)
+            .eraseToEffect()
             .map(AppAction.centralManager)
         
     case .onDisappear:
