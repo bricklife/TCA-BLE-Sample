@@ -26,7 +26,6 @@ enum AppAction: Equatable {
     case scanButtonTapped
     case stopButtonTapped
     case connectButtonTapped(uuid: UUID)
-    case discoverButtonTapped
 }
 
 struct AppEnvironment {
@@ -39,6 +38,7 @@ struct CentralManagerId: Hashable {}
 struct PeripheralId: Hashable {}
 
 let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, environment in
+    
     switch action {
     case .centralManager(let action):
         switch action {
@@ -54,10 +54,13 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
         case let .didConnect(peripheral: peripheral):
             print("Connected:", peripheral.name ?? "nil")
             state.isConnectingPeripheral = true
-            return environment.peripheral.create(id: PeripheralId(), peripheral: peripheral)
-                .receive(on: environment.mainQueue)
-                .eraseToEffect()
-                .map(AppAction.peripheral)
+            return Effect.merge(
+                environment.peripheral.create(id: PeripheralId(), peripheral: peripheral)
+                    .receive(on: environment.mainQueue)
+                    .eraseToEffect()
+                    .map(AppAction.peripheral),
+                environment.peripheral.discoverServices(id: PeripheralId())
+                    .fireAndForget())
             
         case let .didDisconnect(peripheral: peripheral, error: error):
             print("Disconnected", peripheral, error ?? "nil")
@@ -101,10 +104,6 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
                 .fireAndForget()
         }
         return .none
-        
-    case .discoverButtonTapped:
-        return environment.peripheral.discoverServices(id: PeripheralId())
-            .fireAndForget()
     }
 }
 
@@ -131,9 +130,6 @@ struct ContentView: View {
                         }
                     }
                 }
-                Button("Discover Services") {
-                    viewStore.send(.discoverButtonTapped)
-                }.disabled(!viewStore.isConnectingPeripheral)
             }
             .onAppear { viewStore.send(.onAppear) }
             .onDisappear { viewStore.send(.onDisappear) }
