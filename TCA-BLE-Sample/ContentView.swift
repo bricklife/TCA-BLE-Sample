@@ -13,7 +13,7 @@ import ComposableBluetoothCentralManager
 struct AppState: Equatable {
     var isEnableBLE = false
     var isScanning = false
-    var discoveredPeripherals: [UUID : CBPeripheral] = [:]
+    var discoveredPeripherals: [CBPeripheral] = []
     var isConnectingPeripheral = false
 }
 
@@ -48,7 +48,9 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             
         case let .didDiscover(peripheral: peripheral, advertisementData: advertisementData, rssi: rssi):
             print("Discovered:", peripheral, advertisementData, rssi)
-            state.discoveredPeripherals[peripheral.identifier] = peripheral
+            if !state.discoveredPeripherals.contains(peripheral) {
+                state.discoveredPeripherals.append(peripheral)
+            }
             return .none
             
         case let .didConnect(peripheral: peripheral):
@@ -88,7 +90,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             .fireAndForget()
         
     case .scanButtonTapped:
-        state.discoveredPeripherals = [:]
+        state.discoveredPeripherals = []
         state.isScanning = true
         return environment.centralManager.scanForPeripherals(id: CentralManagerId(), withServices: nil, options: nil)
             .fireAndForget()
@@ -99,7 +101,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             .fireAndForget()
         
     case .connectButtonTapped(let uuid):
-        if let peripheral = state.discoveredPeripherals[uuid] {
+        if let peripheral = state.discoveredPeripherals.first(where: { $0.identifier == uuid }) {
             return environment.centralManager.connect(id: CentralManagerId(), peripheral: peripheral, options: nil)
                 .fireAndForget()
         }
@@ -123,10 +125,10 @@ struct ContentView: View {
                         viewStore.send(.scanButtonTapped)
                     }.disabled(!viewStore.isEnableBLE)
                 }
-                ForEach(Array(viewStore.discoveredPeripherals.keys), id: \.self) { uuid in
-                    if let name = viewStore.discoveredPeripherals[uuid]?.name {
+                ForEach(viewStore.discoveredPeripherals, id: \.self) { peripheral in
+                    if let name = peripheral.name {
                         Button("Connect \"\(name)\"") {
-                            viewStore.send(.connectButtonTapped(uuid: uuid))
+                            viewStore.send(.connectButtonTapped(uuid: peripheral.identifier))
                         }
                     }
                 }
