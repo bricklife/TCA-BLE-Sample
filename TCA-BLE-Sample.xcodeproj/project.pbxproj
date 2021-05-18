@@ -15,6 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CBC1A3C526534433003171FC /* TCA-BLE-Sample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TCA-BLE-Sample.entitlements"; sourceTree = "<group>"; };
 		CBE9FB9A26525A7600E7038D /* TCA-BLE-Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TCA-BLE-Sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBE9FB9D26525A7600E7038D /* BLESampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLESampleApp.swift; sourceTree = "<group>"; };
 		CBE9FB9F26525A7600E7038D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -54,6 +55,7 @@
 		CBE9FB9C26525A7600E7038D /* TCA-BLE-Sample */ = {
 			isa = PBXGroup;
 			children = (
+				CBC1A3C526534433003171FC /* TCA-BLE-Sample.entitlements */,
 				CBE9FB9D26525A7600E7038D /* BLESampleApp.swift */,
 				CBE9FB9F26525A7600E7038D /* ContentView.swift */,
 				CBE9FBA126525A7800E7038D /* Assets.xcassets */,
@@ -275,6 +277,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "TCA-BLE-Sample/TCA-BLE-Sample.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"TCA-BLE-Sample/Preview Content\"";
 				DEVELOPMENT_TEAM = UV6TAX3ANB;
@@ -287,8 +290,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bricklife.TCA-BLE-Sample";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Debug;
 		};
@@ -297,6 +301,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "TCA-BLE-Sample/TCA-BLE-Sample.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"TCA-BLE-Sample/Preview Content\"";
 				DEVELOPMENT_TEAM = UV6TAX3ANB;
@@ -309,8 +314,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.bricklife.TCA-BLE-Sample";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Release;
 		};
