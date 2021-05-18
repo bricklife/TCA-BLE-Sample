@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CBC1A3CA2653AE68003171FC /* Peripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC1A3C92653AE68003171FC /* Peripheral.swift */; };
 		CBE9FB9E26525A7600E7038D /* BLESampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE9FB9D26525A7600E7038D /* BLESampleApp.swift */; };
 		CBE9FBA026525A7600E7038D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE9FB9F26525A7600E7038D /* ContentView.swift */; };
 		CBE9FBA226525A7800E7038D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CBE9FBA126525A7800E7038D /* Assets.xcassets */; };
@@ -16,6 +17,7 @@
 
 /* Begin PBXFileReference section */
 		CBC1A3C526534433003171FC /* TCA-BLE-Sample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TCA-BLE-Sample.entitlements"; sourceTree = "<group>"; };
+		CBC1A3C92653AE68003171FC /* Peripheral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Peripheral.swift; sourceTree = "<group>"; };
 		CBE9FB9A26525A7600E7038D /* TCA-BLE-Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TCA-BLE-Sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBE9FB9D26525A7600E7038D /* BLESampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLESampleApp.swift; sourceTree = "<group>"; };
 		CBE9FB9F26525A7600E7038D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 				CBC1A3C526534433003171FC /* TCA-BLE-Sample.entitlements */,
 				CBE9FB9D26525A7600E7038D /* BLESampleApp.swift */,
 				CBE9FB9F26525A7600E7038D /* ContentView.swift */,
+				CBC1A3C92653AE68003171FC /* Peripheral.swift */,
 				CBE9FBA126525A7800E7038D /* Assets.xcassets */,
 				CBE9FBA626525A7800E7038D /* Info.plist */,
 				CBE9FBA326525A7800E7038D /* Preview Content */,
@@ -149,6 +152,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CBE9FBA026525A7600E7038D /* ContentView.swift in Sources */,
+				CBC1A3CA2653AE68003171FC /* Peripheral.swift in Sources */,
 				CBE9FB9E26525A7600E7038D /* BLESampleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
