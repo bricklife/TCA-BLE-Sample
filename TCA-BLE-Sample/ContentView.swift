@@ -114,25 +114,29 @@ struct ContentView: View {
     
     var body: some View {
         WithViewStore(store) { viewStore in
-            VStack(spacing: 10) {
-                Text("Discovered \(viewStore.discoveredPeripherals.count) peripherals")
-                if viewStore.state.isScanning {
-                    Button("Stop") {
-                        viewStore.send(.stopButtonTapped)
-                    }.disabled(!viewStore.isEnableBLE)
-                } else {
-                    Button("Scan") {
-                        viewStore.send(.scanButtonTapped)
-                    }.disabled(!viewStore.isEnableBLE)
+            VStack(alignment: .leading ,spacing: 10) {
+                HStack(spacing: 10) {
+                    if viewStore.state.isScanning {
+                        Button("Stop") {
+                            viewStore.send(.stopButtonTapped)
+                        }.disabled(!viewStore.isEnableBLE)
+                    } else {
+                        Button("Scan") {
+                            viewStore.send(.scanButtonTapped)
+                        }.disabled(!viewStore.isEnableBLE)
+                    }
+                    Text("Discovered \(viewStore.discoveredPeripherals.count) peripherals")
                 }
-                ForEach(viewStore.discoveredPeripherals, id: \.self) { peripheral in
-                    if let name = peripheral.name {
-                        Button("Connect \"\(name)\"") {
-                            viewStore.send(.connectButtonTapped(uuid: peripheral.identifier))
-                        }
+                
+                Divider()
+                
+                List(viewStore.discoveredPeripherals, id: \.self) { peripheral in
+                    Button(peripheral.name ?? "Unknown") {
+                        viewStore.send(.connectButtonTapped(uuid: peripheral.identifier))
                     }
                 }
             }
+            .padding()
             .onAppear { viewStore.send(.onAppear) }
             .onDisappear { viewStore.send(.onDisappear) }
         }
