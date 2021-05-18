@@ -13,8 +13,8 @@ import ComposableBluetoothCentralManager
 struct AppState: Equatable {
     var isEnableBLE = false
     var isScanning = false
-    var discoveredDevices: [UUID : CBPeripheral] = [:]
-    var isConnectedDevice = false
+    var discoveredPeripherals: [UUID : CBPeripheral] = [:]
+    var isConnectingPeripheral = false
 }
 
 enum AppAction: Equatable {
@@ -48,12 +48,12 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             
         case let .didDiscover(peripheral: peripheral, advertisementData: advertisementData, rssi: rssi):
             print("Discovered:", peripheral, advertisementData, rssi)
-            state.discoveredDevices[peripheral.identifier] = peripheral
+            state.discoveredPeripherals[peripheral.identifier] = peripheral
             return .none
             
         case let .didConnect(peripheral: peripheral):
             print("Connected:", peripheral.name ?? "nil")
-            state.isConnectedDevice = true
+            state.isConnectingPeripheral = true
             return environment.peripheral.create(id: PeripheralId(), peripheral: peripheral)
                 .receive(on: environment.mainQueue)
                 .eraseToEffect()
@@ -85,7 +85,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             .fireAndForget()
         
     case .scanButtonTapped:
-        state.discoveredDevices = [:]
+        state.discoveredPeripherals = [:]
         state.isScanning = true
         return environment.centralManager.scanForPeripherals(id: CentralManagerId(), withServices: nil, options: nil)
             .fireAndForget()
@@ -96,7 +96,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             .fireAndForget()
         
     case .connectButtonTapped(let uuid):
-        if let peripheral = state.discoveredDevices[uuid] {
+        if let peripheral = state.discoveredPeripherals[uuid] {
             return environment.centralManager.connect(id: CentralManagerId(), peripheral: peripheral, options: nil)
                 .fireAndForget()
         }
@@ -114,7 +114,7 @@ struct ContentView: View {
     var body: some View {
         WithViewStore(store) { viewStore in
             VStack(spacing: 10) {
-                Text("Discovered \(viewStore.discoveredDevices.count) devices")
+                Text("Discovered \(viewStore.discoveredPeripherals.count) peripherals")
                 if viewStore.state.isScanning {
                     Button("Stop") {
                         viewStore.send(.stopButtonTapped)
@@ -124,8 +124,8 @@ struct ContentView: View {
                         viewStore.send(.scanButtonTapped)
                     }.disabled(!viewStore.isEnableBLE)
                 }
-                ForEach(Array(viewStore.discoveredDevices.keys), id: \.self) { uuid in
-                    if let name = viewStore.discoveredDevices[uuid]?.name {
+                ForEach(Array(viewStore.discoveredPeripherals.keys), id: \.self) { uuid in
+                    if let name = viewStore.discoveredPeripherals[uuid]?.name {
                         Button("Connect \"\(name)\"") {
                             viewStore.send(.connectButtonTapped(uuid: uuid))
                         }
@@ -133,7 +133,7 @@ struct ContentView: View {
                 }
                 Button("Discover Services") {
                     viewStore.send(.discoverButtonTapped)
-                }.disabled(!viewStore.isConnectedDevice)
+                }.disabled(!viewStore.isConnectingPeripheral)
             }
             .onAppear { viewStore.send(.onAppear) }
             .onDisappear { viewStore.send(.onDisappear) }
