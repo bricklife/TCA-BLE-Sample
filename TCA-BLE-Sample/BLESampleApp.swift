@@ -19,7 +19,8 @@ struct BLESampleApp: App {
                     reducer: appReducer,
                     environment: AppEnvironment(
                         mainQueue: DispatchQueue.main.eraseToAnyScheduler(),
-                        centralManager: CentralManager.live
+                        centralManager: CentralManager.live,
+                        peripheral: Peripheral.live
                     )
                 )
             )

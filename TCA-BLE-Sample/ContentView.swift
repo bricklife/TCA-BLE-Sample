@@ -13,24 +13,30 @@ import ComposableBluetoothCentralManager
 struct AppState: Equatable {
     var isEnableBLE = false
     var isScanning = false
-    var discoveredDevices: [CBPeripheral] = []
+    var discoveredDevices: [UUID : CBPeripheral] = [:]
+    var isConnectedDevice = false
 }
 
 enum AppAction: Equatable {
     case centralManager(CentralManager.Action)
+    case peripheral(Peripheral.Action)
     
     case onAppear
     case onDisappear
     case scanButtonTapped
     case stopButtonTapped
+    case connectButtonTapped(uuid: UUID)
+    case discoverButtonTapped
 }
 
 struct AppEnvironment {
     var mainQueue: AnySchedulerOf<DispatchQueue>
     var centralManager: CentralManager
+    var peripheral: Peripheral
 }
 
 struct CentralManagerId: Hashable {}
+struct PeripheralId: Hashable {}
 
 let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, environment in
     switch action {
@@ -38,15 +44,35 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
         switch action {
         case .centralManagerDidUpdateState:
             state.isEnableBLE = environment.centralManager.state(id: CentralManagerId()) == .poweredOn
+            return .none
             
         case let .didDiscover(peripheral: peripheral, advertisementData: advertisementData, rssi: rssi):
             print("Discovered:", peripheral, advertisementData, rssi)
-            state.discoveredDevices.append(peripheral)
+            state.discoveredDevices[peripheral.identifier] = peripheral
+            return .none
+            
+        case let .didConnect(peripheral: peripheral):
+            print("Connected:", peripheral.name ?? "nil")
+            state.isConnectedDevice = true
+            return environment.peripheral.create(id: PeripheralId(), peripheral: peripheral)
+                .receive(on: environment.mainQueue)
+                .eraseToEffect()
+                .map(AppAction.peripheral)
+            
+        case let .didDisconnect(peripheral: peripheral, error: error):
+            print("Disconnected", peripheral, error ?? "nil")
+            return .none
             
         default:
-            break
+            return .none
         }
-        return .none
+        
+    case .peripheral(let action):
+        switch action {
+        case .didDiscoverServices:
+            print("Discovered Services:", environment.peripheral.services(id: PeripheralId()) ?? "nil")
+            return .none
+        }
         
     case .onAppear:
         return environment.centralManager.create(id: CentralManagerId(), queue: DispatchQueue(label: "com.bricklife.tca-ble"))
@@ -59,7 +85,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             .fireAndForget()
         
     case .scanButtonTapped:
-        state.discoveredDevices = []
+        state.discoveredDevices = [:]
         state.isScanning = true
         return environment.centralManager.scanForPeripherals(id: CentralManagerId(), withServices: nil, options: nil)
             .fireAndForget()
@@ -67,6 +93,17 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
     case .stopButtonTapped:
         state.isScanning = false
         return environment.centralManager.stopScan(id: CentralManagerId())
+            .fireAndForget()
+        
+    case .connectButtonTapped(let uuid):
+        if let peripheral = state.discoveredDevices[uuid] {
+            return environment.centralManager.connect(id: CentralManagerId(), peripheral: peripheral, options: nil)
+                .fireAndForget()
+        }
+        return .none
+        
+    case .discoverButtonTapped:
+        return environment.peripheral.discoverServices(id: PeripheralId())
             .fireAndForget()
     }
 }
@@ -87,6 +124,16 @@ struct ContentView: View {
                         viewStore.send(.scanButtonTapped)
                     }.disabled(!viewStore.isEnableBLE)
                 }
+                ForEach(Array(viewStore.discoveredDevices.keys), id: \.self) { uuid in
+                    if let name = viewStore.discoveredDevices[uuid]?.name {
+                        Button("Connect \"\(name)\"") {
+                            viewStore.send(.connectButtonTapped(uuid: uuid))
+                        }
+                    }
+                }
+                Button("Discover Services") {
+                    viewStore.send(.discoverButtonTapped)
+                }.disabled(!viewStore.isConnectedDevice)
             }
             .onAppear { viewStore.send(.onAppear) }
             .onDisappear { viewStore.send(.onDisappear) }
@@ -102,7 +149,8 @@ struct ContentView_Previews: PreviewProvider {
                 reducer: appReducer,
                 environment: AppEnvironment(
                     mainQueue: DispatchQueue.main.eraseToAnyScheduler(),
-                    centralManager: CentralManager.live
+                    centralManager: CentralManager.live,
+                    peripheral: Peripheral.live
                 )
             )
         )
