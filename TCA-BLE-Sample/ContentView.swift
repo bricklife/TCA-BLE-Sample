@@ -16,6 +16,7 @@ struct AppState: Equatable {
     var isScanning = false
     var discoveredPeripherals: [CBPeripheral] = []
     var connectingPeripheral: CBPeripheral? = nil
+    var isConnecting = false
 }
 
 enum AppAction: Equatable {
@@ -56,11 +57,16 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             
         case let .didConnect(peripheral: peripheral):
             print("Connected:", peripheral.name ?? "nil")
-            state.connectingPeripheral = peripheral
+            state.isConnecting = false
             return environment.peripheralManager.addPeripheral(id: PeripheralManagerId(), peripheral: peripheral, services: nil)
                 .fireAndForget()
+        case .didFailToConnect:
+            state.connectingPeripheral = nil
+            state.isConnecting = false
+            return .none
             
         case let .didDisconnect(peripheral: peripheral, error: error):
+            state.connectingPeripheral = nil
             print("Disconnected", peripheral, error ?? "nil")
             return .none
             
@@ -111,6 +117,8 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
         
     case .connectButtonTapped(let uuid):
         if let peripheral = state.discoveredPeripherals.first(where: { $0.identifier == uuid }) {
+            state.connectingPeripheral = peripheral
+            state.isConnecting = true
             return environment.centralManager.connect(id: CentralManagerId(), peripheral: peripheral, options: nil)
                 .fireAndForget()
         }
@@ -125,7 +133,7 @@ struct ContentView: View {
         WithViewStore(store) { viewStore in
             VStack(alignment: .leading ,spacing: 10) {
                 HStack(spacing: 10) {
-                    if viewStore.state.isScanning {
+                    if viewStore.isScanning {
                         Button("Stop") {
                             viewStore.send(.stopButtonTapped)
                         }.disabled(!viewStore.isEnableBLE)
@@ -135,16 +143,25 @@ struct ContentView: View {
                         }.disabled(!viewStore.isEnableBLE)
                     }
                     Text("Discovered \(viewStore.discoveredPeripherals.count) peripherals")
+                    Spacer()
+                    if viewStore.isScanning {
+                        ProgressView()
+                    }
                 }
                 
                 Divider()
                 
                 List(viewStore.discoveredPeripherals, id: \.self) { peripheral in
-                    if peripheral == viewStore.connectingPeripheral {
-                        Image(systemName: "checkmark")
-                    }
                     Button(peripheral.name ?? "Unknown") {
                         viewStore.send(.connectButtonTapped(uuid: peripheral.identifier))
+                    }
+                    Spacer()
+                    if peripheral == viewStore.connectingPeripheral {
+                        if viewStore.isConnecting {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "checkmark")
+                        }
                     }
                 }
             }
