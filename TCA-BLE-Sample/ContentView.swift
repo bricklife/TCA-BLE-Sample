@@ -9,6 +9,7 @@ import SwiftUI
 import CoreBluetooth
 import ComposableArchitecture
 import ComposableBluetoothCentralManager
+import ComposableBluetoothPeripheralManager
 
 struct AppState: Equatable {
     var isEnableBLE = false
@@ -19,7 +20,7 @@ struct AppState: Equatable {
 
 enum AppAction: Equatable {
     case centralManager(CentralManager.Action)
-    case peripheral(Peripheral.Action)
+    case peripheralManager(PeripheralManager.Action)
     
     case onAppear
     case onDisappear
@@ -31,11 +32,11 @@ enum AppAction: Equatable {
 struct AppEnvironment {
     var mainQueue: AnySchedulerOf<DispatchQueue>
     var centralManager: CentralManager
-    var peripheral: Peripheral
+    var peripheralManager: PeripheralManager
 }
 
 struct CentralManagerId: Hashable {}
-struct PeripheralId: Hashable {}
+struct PeripheralManagerId: Hashable {}
 
 let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, environment in
     
@@ -56,13 +57,8 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
         case let .didConnect(peripheral: peripheral):
             print("Connected:", peripheral.name ?? "nil")
             state.isConnectingPeripheral = true
-            return Effect.merge(
-                environment.peripheral.create(id: PeripheralId(), peripheral: peripheral)
-                    .receive(on: environment.mainQueue)
-                    .eraseToEffect()
-                    .map(AppAction.peripheral),
-                environment.peripheral.discoverServices(id: PeripheralId())
-                    .fireAndForget())
+            return environment.peripheralManager.addPeripheral(id: PeripheralManagerId(), peripheral: peripheral, services: nil)
+                .fireAndForget()
             
         case let .didDisconnect(peripheral: peripheral, error: error):
             print("Disconnected", peripheral, error ?? "nil")
@@ -72,22 +68,35 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             return .none
         }
         
-    case .peripheral(let action):
+    case .peripheralManager(let action):
         switch action {
-        case .didDiscoverServices:
-            print("Discovered Services:", environment.peripheral.services(id: PeripheralId()) ?? "nil")
+        case let .didDiscoverServices(peripheral, error: error):
+            print("Discovered Services:", peripheral.services ?? "nil")
+            return .none
+            
+        default:
             return .none
         }
         
     case .onAppear:
-        return environment.centralManager.create(id: CentralManagerId(), queue: DispatchQueue(label: "com.bricklife.tca-ble"))
-            .receive(on: environment.mainQueue)
-            .eraseToEffect()
-            .map(AppAction.centralManager)
+        return .merge(
+            environment.centralManager.create(id: CentralManagerId(), queue: DispatchQueue(label: "com.bricklife.tca-ble"))
+                .receive(on: environment.mainQueue)
+                .eraseToEffect()
+                .map(AppAction.centralManager),
+            environment.peripheralManager.create(id: PeripheralManagerId())
+                .receive(on: environment.mainQueue)
+                .eraseToEffect()
+                .map(AppAction.peripheralManager)
+        )
         
     case .onDisappear:
-        return environment.centralManager.destroy(id: CentralManagerId())
-            .fireAndForget()
+        return .merge(
+            environment.centralManager.destroy(id: CentralManagerId())
+                .fireAndForget(),
+            environment.peripheralManager.destroy(id: PeripheralManagerId())
+                .fireAndForget()
+        )
         
     case .scanButtonTapped:
         state.discoveredPeripherals = []
@@ -152,7 +161,7 @@ struct ContentView_Previews: PreviewProvider {
                 environment: AppEnvironment(
                     mainQueue: DispatchQueue.main.eraseToAnyScheduler(),
                     centralManager: CentralManager.live,
-                    peripheral: Peripheral.live
+                    peripheralManager: PeripheralManager.live
                 )
             )
         )

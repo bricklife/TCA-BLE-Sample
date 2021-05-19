@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import ComposableBluetoothCentralManager
+import ComposableBluetoothPeripheralManager
 
 @main
 struct BLESampleApp: App {
@@ -20,7 +21,7 @@ struct BLESampleApp: App {
                     environment: AppEnvironment(
                         mainQueue: DispatchQueue.main.eraseToAnyScheduler(),
                         centralManager: CentralManager.live,
-                        peripheral: Peripheral.live
+                        peripheralManager: PeripheralManager.live
                     )
                 )
             )
