@@ -15,7 +15,7 @@ struct AppState: Equatable {
     var isEnableBLE = false
     var isScanning = false
     var discoveredPeripherals: [CBPeripheral] = []
-    var isConnectingPeripheral = false
+    var connectingPeripheral: CBPeripheral? = nil
 }
 
 enum AppAction: Equatable {
@@ -56,7 +56,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment> { state, action, e
             
         case let .didConnect(peripheral: peripheral):
             print("Connected:", peripheral.name ?? "nil")
-            state.isConnectingPeripheral = true
+            state.connectingPeripheral = peripheral
             return environment.peripheralManager.addPeripheral(id: PeripheralManagerId(), peripheral: peripheral, services: nil)
                 .fireAndForget()
             
@@ -140,6 +140,9 @@ struct ContentView: View {
                 Divider()
                 
                 List(viewStore.discoveredPeripherals, id: \.self) { peripheral in
+                    if peripheral == viewStore.connectingPeripheral {
+                        Image(systemName: "checkmark")
+                    }
                     Button(peripheral.name ?? "Unknown") {
                         viewStore.send(.connectButtonTapped(uuid: peripheral.identifier))
                     }
