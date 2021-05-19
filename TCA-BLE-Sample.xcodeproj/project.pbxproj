@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CBA8F2942654178B00EE749F /* ComposableBluetoothPeripheralManager in Frameworks */ = {isa = PBXBuildFile; productRef = CBA8F2932654178B00EE749F /* ComposableBluetoothPeripheralManager */; };
 		CBC1A3CA2653AE68003171FC /* Peripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC1A3C92653AE68003171FC /* Peripheral.swift */; };
 		CBE9FB9E26525A7600E7038D /* BLESampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE9FB9D26525A7600E7038D /* BLESampleApp.swift */; };
 		CBE9FBA026525A7600E7038D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE9FB9F26525A7600E7038D /* ContentView.swift */; };
@@ -31,6 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBA8F2942654178B00EE749F /* ComposableBluetoothPeripheralManager in Frameworks */,
 				CBE9FBAE26525AEA00E7038D /* ComposableBluetoothCentralManager in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -94,6 +96,7 @@
 			name = "TCA-BLE-Sample";
 			packageProductDependencies = (
 				CBE9FBAD26525AEA00E7038D /* ComposableBluetoothCentralManager */,
+				CBA8F2932654178B00EE749F /* ComposableBluetoothPeripheralManager */,
 			);
 			productName = "TCA-BLE-Sample";
 			productReference = CBE9FB9A26525A7600E7038D /* TCA-BLE-Sample.app */;
@@ -124,6 +127,7 @@
 			mainGroup = CBE9FB9126525A7600E7038D;
 			packageReferences = (
 				CBE9FBAC26525AEA00E7038D /* XCRemoteSwiftPackageReference "composable-bluetooth-central-manager" */,
+				CBA8F2922654178B00EE749F /* XCRemoteSwiftPackageReference "composable-bluetooth-peripheral-manager" */,
 			);
 			productRefGroup = CBE9FB9B26525A7600E7038D /* Products */;
 			projectDirPath = "";
@@ -348,6 +352,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		CBA8F2922654178B00EE749F /* XCRemoteSwiftPackageReference "composable-bluetooth-peripheral-manager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tcakit/composable-bluetooth-peripheral-manager";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		CBE9FBAC26525AEA00E7038D /* XCRemoteSwiftPackageReference "composable-bluetooth-central-manager" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/tcakit/composable-bluetooth-central-manager/";
@@ -359,6 +371,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		CBA8F2932654178B00EE749F /* ComposableBluetoothPeripheralManager */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBA8F2922654178B00EE749F /* XCRemoteSwiftPackageReference "composable-bluetooth-peripheral-manager" */;
+			productName = ComposableBluetoothPeripheralManager;
+		};
 		CBE9FBAD26525AEA00E7038D /* ComposableBluetoothCentralManager */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CBE9FBAC26525AEA00E7038D /* XCRemoteSwiftPackageReference "composable-bluetooth-central-manager" */;

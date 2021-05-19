@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "ComposableBluetoothPeripheralManager",
+        "repositoryURL": "https://github.com/tcakit/composable-bluetooth-peripheral-manager",
+        "state": {
+          "branch": "main",
+          "revision": "cfd01635b410ae1ad076b551505a42739a36723d",
+          "version": null
+        }
+      },
+      {
         "package": "swift-case-paths",
         "repositoryURL": "https://github.com/pointfreeco/swift-case-paths",
         "state": {
